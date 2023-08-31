@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -55,25 +56,31 @@ def authenticate_gcp_oauth2(auth_dir, scopes):
     creds = None
 
     # Check for existing token
-    if os.path.exists(auth_dir + 'token.json'):
+    if os.path.exists(os.path.join(auth_dir, 'token.json')):
         creds = Credentials.from_authorized_user_file(auth_dir + 'token.json', scopes)
     
+    if creds and creds.valid: return creds
+
     # If no or expired token, log user in with credentials
-    if not creds or not creds.valid:
-        # Check for expired credentials
-        if creds and creds.expired and creds.refresh_token:
+    if creds and creds.expired and creds.refresh_token:
+        try:
             creds.refresh(Request())
-        
-        else:
-            # Authenticate from scratch using downloaded credentials
-            if not os.path.exists(auth_dir + 'credentials.json'):
-                raise FileNotFoundError(f"Must have a credentials.json file in {auth_dir}")
-            flow = InstalledAppFlow.from_client_secrets_file(auth_dir + 'credentials.json', scopes)
-            creds = flow.run_local_server(port=0)
-        
-        # Save the credentials for the next run
-        with open(auth_dir + 'token.json', 'w') as token:
-            token.write(creds.to_json())
+            return creds
+        except RefreshError:
+            # Expired token; remove it and go from scratch
+            print("Removing expired token...")
+            os.remove(os.path.join(auth_dir, 'token.json'))
+
+    # Authenticate from scratch using downloaded credentials
+    if not os.path.exists(os.path.join(auth_dir, 'credentials.json')):
+        raise FileNotFoundError(f"Must have a credentials.json file in {auth_dir}")
+    flow = InstalledAppFlow.from_client_secrets_file(
+        os.path.join(auth_dir, 'credentials.json'), scopes)
+    creds = flow.run_local_server(port=0)
+    
+    # Save the credentials for the next run
+    with open(os.path.join(auth_dir, 'token.json'), 'w') as token:
+        token.write(creds.to_json())
 
     return creds
 
