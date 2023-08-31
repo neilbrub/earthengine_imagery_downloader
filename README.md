@@ -21,19 +21,25 @@ Nearly all functionality is defined in the `eeImageryInterface` class and associ
 
 1. Install miniconda if not already installed
 
-2. Restore conda environment from environment.yml: `conda env create -f environment.yml`
+2. Restore conda environment from environment.yml: `conda env create -f environment.yml`.
+Activate the conda environment.
 
-3. Install this code as a package: `pip install -e .`
+3. Install this code as a package: `pip install -e .` (include the '.')
+
+4. Initialize earthengine-api: run `earthengine authenticate`. Sign into the Google account
+whose Google Drive storage you would like to use for image exporting (see Workflow step 3).
 
 ## Workflow
 
+All code is in `./ee_imagery_downloader`.
+
 ### 1. Configure Regions of Interest, Image Collections, and Image Filtering
 
-Start with `./config/roi_configs.py` and `./config/collection_filters.py`.
+Start with `config/roi_configs.py` and `config/collection_filters.py`.
 
 ### 2. Explore Configured Imagery in a GEE-Interfacing Notebook 
 
-See `./notebooks/browse_ee_imagery_example.ipynb`.
+See `notebooks/browse_ee_imagery_example.ipynb`.
 
 Keep in mind that while some `eeImageryInterface` methods accept date ranges to return
 imagery for (e.g. for visualization), the <b>imagery that has been filtered, loaded and
@@ -44,7 +50,7 @@ made available to the client-side class instance is defined by the roi configura
 Exporting via Google Drive is necessary for files larger than 32MB. If your imagery is 
 smaller than that, see [Image.getDownloadURL](https://developers.google.com/earth-engine/apidocs/ee-image-getdownloadurl).
 
-Navigate to and run `./scripts/export_imagery.py`. To see available arguments:
+Navigate to and run `scripts/export_imagery.py`. To see available arguments:
 
 ```
 export_imagery.py --help
@@ -57,4 +63,4 @@ if you have a lot of images, this sucks. Instead, you can try setting up & using
 script that leverages the Google Drive API to do this automatically. It requires a few
 steps of Google-y setup, but once it works, it's pretty magical.
 
-See `./scripts/download_drive_files.md`.
+See `scripts/download_drive_files.md`.

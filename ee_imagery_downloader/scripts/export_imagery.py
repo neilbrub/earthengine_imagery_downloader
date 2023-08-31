@@ -35,6 +35,11 @@ def parse_args():
     parser.add_argument('--end-date', '-e', default=None,
                         help=f'End of date range ({date_fmt_readable}) for which to export imagery')
 
+    # parser.add_argument('--no-mosaic', action='store_true',
+    #                     help='Export imagery tiles rather than mosaicked images (faster '
+    #                     'and may avoid Drive chunking - '
+    #                     'https://developers.google.com/earth-engine/guides/exporting_images#large_file_exports)')
+
     args = parser.parse_args()
     roi = args.roi
     collection = args.collection
@@ -63,6 +68,9 @@ def parse_args():
             'end': end_date,
             'format': accepted_date_fmt
         }
+
+    # mosaic = not args.no_mosaic
+    mosaic=True
     
     return {
         'roi': roi,
@@ -71,7 +79,8 @@ def parse_args():
         'nested_keys': nested_keys,
         'season': season,
         'date_query': date_query,
-        'res': res
+        'res': res,
+        'mosaic': mosaic
     }
 
 
@@ -85,6 +94,7 @@ if __name__ == "__main__":
         nested_keys=args['nested_keys'],
         season=args['season'],
         date_query=args['date_query'],
+        mosaic=args['mosaic'],
         export_params={
             'scale': args['res']
         }
