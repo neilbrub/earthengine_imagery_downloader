@@ -17,6 +17,14 @@ SAR imagery at the same time, but give each a handle to interact with individual
 
 Nearly all functionality is defined in the `eeImageryInterface` class and associated `utils.py`.
 
+## Setup
+
+1. Install miniconda if not already installed
+
+2. Restore conda environment from environment.yml: `conda env create -f environment.yml`
+
+3. Install this code as a package: `pip install -e .`
+
 ## Workflow
 
 ### 1. Configure Regions of Interest, Image Collections, and Image Filtering
