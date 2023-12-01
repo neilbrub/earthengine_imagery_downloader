@@ -111,9 +111,9 @@ def genMosaickingFunction(image_collection, roi, mosaic_window='hour'):
     Args:
         - image_collection: ee.ImageCollection to mosaic
         - roi: ee.Geometry object
-        - mosaic_window (default='hour'): one of 'hour', 'day' or 'week'.
+        - mosaic_window (default='hour'): one of 'hour', 'day', 'week' or 'month'
     """
-    supported_mosaic_windows = ['hour', 'day', 'week']
+    supported_mosaic_windows = ['hour', 'day', 'week', 'month']
     if mosaic_window not in supported_mosaic_windows:
         raise ValueError(f"mosaic_window must be in {supported_mosaic_windows}; " \
                          f"received {mosaic_window}")
@@ -151,7 +151,7 @@ def doMosaic(collection, startDate, endDate, roi, mosaic_window='hour'):
     
 
     """
-    supported_mosaic_windows = ['hour', 'day', 'week']
+    supported_mosaic_windows = ['hour', 'day', 'week', 'month']
     if mosaic_window not in supported_mosaic_windows:
         raise ValueError(f"mosaic_window must be in {supported_mosaic_windows}; " \
                          f"received {mosaic_window}")

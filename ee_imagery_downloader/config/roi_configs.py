@@ -1,4 +1,4 @@
-from ee_imagery_downloader.config.collection_filters import example_S1_filters, example_S2_filters
+import ee_imagery_downloader.config.collection_filters as coll_filters
 
 """
 This file configures regions of interest (RoI). RoIs are registered by an entry
@@ -20,8 +20,8 @@ This file configures regions of interest (RoI). RoIs are registered by an entry
 
 # Shorthand to use S1 & S2 as configured in collection_filters.py
 S1_S2_filters = {
-    'S1': example_S1_filters,
-    'S2': example_S2_filters
+    'S1': coll_filters.example_S1_filters,
+    'S2': coll_filters.example_S2_filters
 }
 
 roi_configs = {

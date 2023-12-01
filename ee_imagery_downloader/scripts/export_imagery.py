@@ -20,7 +20,7 @@ def parse_args():
     
     parser.add_argument('--keys', '-k', required=False, default=None,
                         help='Nested keys separated by _, e.g. EW_HH-HV '
-                            '(see image_filtering_configs)')
+                            '(as defined in collection_filters)')
    
     parser.add_argument('--bands', '-b', required=False, default=None,
                         help='Bands to include in export, separated by _, '\
@@ -35,10 +35,8 @@ def parse_args():
     parser.add_argument('--end-date', '-e', default=None,
                         help=f'End of date range ({date_fmt_readable}) for which to export imagery')
 
-    # parser.add_argument('--no-mosaic', action='store_true',
-    #                     help='Export imagery tiles rather than mosaicked images (faster '
-    #                     'and may avoid Drive chunking - '
-    #                     'https://developers.google.com/earth-engine/guides/exporting_images#large_file_exports)')
+    parser.add_argument('--mosaic-window', default=None,
+                        help='Mosaic imagery by interval specified (no mosaicking by default)')
 
     args = parser.parse_args()
     roi = args.roi
@@ -68,9 +66,6 @@ def parse_args():
             'end': end_date,
             'format': accepted_date_fmt
         }
-
-    # mosaic = not args.no_mosaic
-    mosaic=True
     
     return {
         'roi': roi,
@@ -80,7 +75,7 @@ def parse_args():
         'season': season,
         'date_query': date_query,
         'res': res,
-        'mosaic': mosaic
+        'mosaic_window': args.mosaic_window
     }
 
 
@@ -94,7 +89,7 @@ if __name__ == "__main__":
         nested_keys=args['nested_keys'],
         season=args['season'],
         date_query=args['date_query'],
-        mosaic=args['mosaic'],
+        mosaic_window=args['mosaic_window'],
         export_params={
             'scale': args['res']
         }

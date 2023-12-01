@@ -42,8 +42,9 @@ Start with `config/roi_configs.py` and `config/collection_filters.py`.
 See `notebooks/browse_ee_imagery_example.ipynb`.
 
 Keep in mind that while some `eeImageryInterface` methods accept date ranges to return
-imagery for (e.g. for visualization), the <b>imagery that has been filtered, loaded and
-made available to the client-side class instance is defined by the roi configuration</b>.
+imagery for (e.g. a subset of images in a season for visualization), the <b>imagery that
+has been filtered, loaded and made available to the client-side class instance is defined
+by the roi configuration</b>.
 
 ### 3. Export Loaded Imagery to Google Drive
 

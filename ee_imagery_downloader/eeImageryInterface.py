@@ -164,7 +164,7 @@ class eeImageryInterface:
             bands=[],
             season=None,
             date_query={},  # {'start', 'end', ['format']}
-            mosaic=True
+            mosaic_window=None  # None, 'hour', 'day', 'week', or 'month'
         ):
         """
         Get imagery for a specified collection, nested group, and season or date range.
@@ -177,7 +177,10 @@ class eeImageryInterface:
             - date_query (obj: default {}) - finer-grained control on selected imagery;
                 should contain keys 'start' and 'end', and optionally 'format' string
                 ('%Y-%m-%d' will be attempted by default).
-            - mosaic (bool: default True)
+            - mosaic_window (str: default None) - If specified, imagery will be mosaicked
+                by the time window specified. If None, images are not mosaicked.
+                Mosaicking can add significantly higher computation time, and result in 
+                larger exported files that may get chunked on Google Drive.
         """
         season, date_query = self._handle_season_and_date_query_args(season, date_query)
 
@@ -201,7 +204,7 @@ class eeImageryInterface:
                 warnings.warn(f"Nested key {k} not found in {season}, {collection}")
 
         # If no additional processing required, return collection (possibly grouped)
-        if not date_query and not mosaic and not bands: return imgry
+        if not date_query and  mosaic_window is None and not bands: return imgry
 
         # It's possible that imgry still points to a tree of nested groups; any
         # processing requested (e.g. filtering or mosaicking) in this case must be
@@ -215,7 +218,7 @@ class eeImageryInterface:
             else ee.Date(self.imagery_filters[season]['date_end'])
 
         # Use a recursive function to traverse the grouped tree & apply processing
-        # within this context 
+        # (filtering, band selection, mosaicking, etc.) within the local context 
         def apply_processing(ptr, sub_keys=[]):
             # Base case - made it to a leaf; apply processing
             if isinstance(ptr, ee.ImageCollection):
@@ -224,16 +227,17 @@ class eeImageryInterface:
                         ee.Filter.date(query_start, query_end))
                 if bands:
                     ptr = ptr.select(bands)
-                if mosaic:
+                if mosaic_window is not None:
                     print(f"Mosaicking {collection}" \
                           f"{'/'+'/'.join(nested_keys) if nested_keys else ''}" \
-                          f"{'/'+'/'.join(sub_keys) if sub_keys else ''}")
+                          f"{'/'+'/'.join(sub_keys) if sub_keys else ''} " \
+                          f"by {mosaic_window}")
                     ptr = utils.doMosaic(
                         ptr,
                         date_start,
                         date_end,
                         self.ee_roi,
-                        mosaic_window='hour'
+                        mosaic_window=mosaic_window
                     )
                 return ptr
 
@@ -253,7 +257,7 @@ class eeImageryInterface:
             bands=[],
             season=None,
             date_query={},
-            mosaic=True,
+            mosaic_window=None,
             export_params={}
         ):
         """
@@ -270,7 +274,7 @@ class eeImageryInterface:
             - date_query (obj: default {}) - finer-grained control on selected imagery;
                 should contain keys 'start' and 'end', and optionally 'format' string
                 ('%Y-%m-%d' will be attempted by default).
-            - mosaic (bool: default True)
+            - mosaic_window (str: default None)
             - export_params (dict: default {})
                 -> (REQ) 'scale' OR 'crsTransform' OR 'dimensions':
                     o 'scale' (int): pixel spacing in meters of exported imagery
@@ -324,7 +328,7 @@ class eeImageryInterface:
             bands=bands,
             season=season,
             date_query=date_query,
-            mosaic=mosaic
+            mosaic_window=mosaic_window
         )
         assert isinstance(export_collection, ee.ImageCollection), \
             "exportCollection only exports one ImageCollection at a time. It appears " \

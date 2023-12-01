@@ -2,7 +2,7 @@
 To allow precise but generalizable selection of imagery from any collection, a nested
 filtering system has been set up.
 
-Filters for each image collection are nestled in multi-level nested dictionaries, whose
+Filters for each image collection are defined in multi-level nested dictionaries, whose
 keys describe a desired grouping configuration. E.g., it might be desired that data from
 a SAR collection is grouped by instrument mode, and within that grouped by polarisation.
 Group keys can be nested indefinitely, and can take any unique string value that is not
@@ -11,11 +11,11 @@ Group keys can be nested indefinitely, and can take any unique string value that
 Eventually, a list under a key called 'filters' should be specified. This list should 
 contain dictionaries each describing an Earth Engine filter that, when applied to the
 collection, will yield data for the group. Specifically, each dict in the 'filters' list
-should have the following key: value pairs:
+should have the following {key: value} pairs:
 
     - 'type': str, an attribute of ee.Filter (assert hasattr(ee.Filter, filter['type']))
 
-    - 'args': list, a list of positional arguments to the ee.Filter
+    - 'args': list, a list of positional arguments to the ee.Filter (order matters!)
 
 Note that this pattern allows arbitrary grouping & filtering for any EE image collection.
 
@@ -65,7 +65,7 @@ example_S2_filters = {
     'filters': [
         {
             'type': 'lt',
-            'args': ['CLOUDY_PIXEL_PERCENTAGE', 60]
+            'args': ['CLOUDY_PIXEL_PERCENTAGE', 80]
         }
     ]
 }
