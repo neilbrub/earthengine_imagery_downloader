@@ -5,8 +5,8 @@ from ee_imagery_downloader.eeImageryInterface import eeImageryInterface
 
 
 def parse_args():
-    accepted_date_fmt = '%Y%m%d'
-    date_fmt_readable = 'yyyymmdd'
+    accepted_date_fmt = '%Y-%m-%d'
+    date_fmt_readable = 'yyyy-mm-dd'
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--roi', required=True,
@@ -59,7 +59,7 @@ def parse_args():
             start_date = dt.datetime.strptime(start_date, accepted_date_fmt)
             end_date = dt.datetime.strptime(end_date, accepted_date_fmt)
         except ValueError:
-            raise ValueError(f"Please specify datestrings in format {accepted_date_fmt}")
+            raise ValueError(f"Please specify datestrings in format {date_fmt_readable}")
         
         date_query = {
             'start': start_date,

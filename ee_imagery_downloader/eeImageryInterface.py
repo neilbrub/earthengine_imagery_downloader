@@ -336,8 +336,12 @@ class eeImageryInterface:
             f"need to specify more nested_keys; \n{self.__str__()}"
 
         # Get user's confirmation on exporting these images & bands
-        n_bands = export_collection.first().bandNames().size().getInfo()
         n_images = export_collection.size().getInfo()
+        if not n_images:
+            print(f"No images found for configuration")
+            return
+
+        n_bands = export_collection.first().bandNames().size().getInfo()
         
         print(f"About to export {n_images} {collection}"
               f"{'/'+'/'.join(nested_keys) if nested_keys else ''} images, "

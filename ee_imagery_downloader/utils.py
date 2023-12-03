@@ -148,16 +148,27 @@ def genMosaickingFunction(image_collection, roi, mosaic_window='hour'):
 def doMosaic(collection, startDate, endDate, roi, mosaic_window='hour'):
     """
     For the specified collection in the specified date range, create a mosaic per window.
+    mosaic_window controls the time interval used for mosaic inclusion; it can be one of
+    {'hour', 'day', 'week', 'month'}.
     
+    Mosaicking is applied to discrete time bins evenly distributed by mosaic_window from
+    the datetime of the first image to that of the last. Images are categorized by bin,
+    and those in the same bin are mosaicked. Note possible unexpected behaviour,
+    e.g. for a mosaic_window='hour':
 
+    |     9am     |    10am    |    11am   |
+    {img1}  {img2} {img3} 
+
+    In this scenario, img1 and img2 will be mosaicked, but img3 will not, even though it
+    is within 1 hour of img2.
     """
     supported_mosaic_windows = ['hour', 'day', 'week', 'month']
     if mosaic_window not in supported_mosaic_windows:
         raise ValueError(f"mosaic_window must be in {supported_mosaic_windows}; " \
                          f"received {mosaic_window}")
 
-    hourly_diff = endDate.difference(startDate, mosaic_window)
-    hourly_datetime_list = ee.List.sequence(0, hourly_diff).map(
+    diff = endDate.difference(startDate, mosaic_window)
+    datetime_list = ee.List.sequence(0, diff).map(
         lambda hour: startDate.advance(hour, mosaic_window)
     )
 
@@ -165,7 +176,7 @@ def doMosaic(collection, startDate, endDate, roi, mosaic_window='hour'):
         print(f"Mosaic called on {type(collection)}, {collection}")
 
     mosaicking_func = genMosaickingFunction(collection, roi, mosaic_window=mosaic_window)
-    mosaics = ee.List(hourly_datetime_list.iterate(mosaicking_func, ee.List([])))
+    mosaics = ee.List(datetime_list.iterate(mosaicking_func, ee.List([])))
     mosaics = ee.ImageCollection(mosaics)
 
     return mosaics
@@ -177,11 +188,20 @@ def exportImageCollection(collection, region, coll_basename, export_params):
     
     coll_size = coll_list.size().getInfo()
     print(f"Launching {coll_size} export tasks...")
+
+    exported_imgname_counts = {}
+
     for i in tqdm(range(coll_size)):
         img = ee.Image(coll_list.get(i)).double()
 
         img_dtstring = dateToDatestring(img.date()).getInfo()
         img_name = f"{coll_basename}_{img_dtstring}"
+
+        if img_name not in exported_imgname_counts:
+            exported_imgname_counts[img_name] = 1
+        else:
+            exported_imgname_counts[img_name] += 1
+            img_name += f"_{exported_imgname_counts[img_name]}"
 
         scale = None
         dims = None
